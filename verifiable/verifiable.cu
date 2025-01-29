@@ -862,7 +862,7 @@ __global__ void prepareInput2(
   intptr_t i = i0 + threadIdx.x;
   while(i < i1) {
     elts[i] = genInput<T>(op, rank_n, rank_me, seed, elt_ix0+i);
-    #if 0
+    #if 1
     T output = genOutput<T>(op, rank_n, seed, elt_ix0+i);
     printf("prepareInput2 T=%d seed=0x%llx r=%d ix=%lld x=%g output=%g elts=%p\n",
       std::is_same<T,int>::value, (long long)seed, int(rank_me), (long long)i, (float)elts[i], (float)output, elts);
