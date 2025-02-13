@@ -672,6 +672,51 @@ __host__ __device__ void genOutput(
 
 namespace {
 template<typename T, bool IsIntegral>
+struct FloatingPointTraits;
+
+template<>
+struct FloatingPointTraits<__half, false> {
+  static constexpr int exponentBits = 5;
+  static constexpr uint64_t exponentMask = 0x7C00; // 0111 1100 0000 0000
+  static constexpr uint64_t normalExponent = 0x0F;
+};
+
+template<>
+struct FloatingPointTraits<float, false> {
+  static constexpr int exponentBits = 8;
+  static constexpr uint64_t exponentMask = 0x7F800000;
+  static constexpr uint64_t normalExponent = 0x7F;
+};
+
+template<>
+struct FloatingPointTraits<double, false> {
+  static constexpr int exponentBits = 11;
+  static constexpr uint64_t exponentMask = 0x7FF0000000000000;
+  static constexpr uint64_t normalExponent = 0x3FF;
+};
+
+template<>
+struct FloatingPointTraits<hip_bfloat16, false> {
+  static constexpr int exponentBits = 8;
+  static constexpr uint64_t exponentMask = 0x7F80;
+  static constexpr uint64_t normalExponent = 0x7F;
+};
+
+template<>
+struct FloatingPointTraits<rccl_float8, false> {
+  static constexpr int exponentBits = 4; // fp8e4m3 format
+  static constexpr uint64_t exponentMask = 0x78;
+  static constexpr uint64_t normalExponent = 0x07;
+};
+
+template<>
+struct FloatingPointTraits<rccl_bfloat8, false> {
+  static constexpr int exponentBits = 5; // fp8e5m2 format
+  static constexpr uint64_t exponentMask = 0xF8;
+  static constexpr uint64_t normalExponent = 0x0F;
+};
+
+template<typename T, bool IsIntegral>
 __host__ __device__ void genInput(
     T &ans, ReduceNil, int rank_n, int rank_me, uint64_t seed, intptr_t index,
     std::integral_constant<bool, IsIntegral>
@@ -681,6 +726,16 @@ __host__ __device__ void genInput(
   bits = mixBits(seed ^ index);
   bits >>= 64 - 8*sizeof(T);
   bits &= uint64_t(-1)>>(64 - 8*sizeof(T));
+
+  if constexpr(!IsIntegral) { // Checks if the datatype is not integral
+    constexpr int exponentBits = FloatingPointTraits<T, IsIntegral>::exponentBits;
+    constexpr uint64_t exponentMask = FloatingPointTraits<T, IsIntegral>::exponentMask;
+    constexpr uint64_t normalExponent = FloatingPointTraits<T, IsIntegral>::normalExponent;
+    if ((bits & exponentMask) == exponentMask) { // Checks if all exponent bits are set to 1, representing NaN or infinity
+      bits &= ~exponentMask; // Clears the exponent bits
+      bits |= normalExponent << (8 * sizeof(T) - exponentBits - 1);  // Set the exponent to a normal value
+    }
+  }
   ans = tmp;
 }
 
