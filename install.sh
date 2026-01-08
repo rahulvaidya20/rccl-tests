@@ -27,7 +27,7 @@ mpi_enabled=false
 rocm_dir=${ROCM_PATH}
 rccl_dir=${rocm_dir}
 mpi_dir=""
-hip_compiler=${rocm_dir}/bin/amdclang++
+hip_compiler=${rocm_dir}/lib/llvm/bin/amdclang++
 gpu_targets=""
 
 # #################################################
@@ -107,8 +107,8 @@ fi
 
 if ! command -v ${hip_compiler} 2>&1 >/dev/null ; then
   echo "[WARN] HIP Compiler does not exist at ${hip_compiler}. Please check the path."
-  echo "[WARN] - Falling back to ${rocm_dir}/bin/amdclang++"
-  hip_compiler=${rocm_dir}/bin/amdclang++
+  echo "[WARN] - Falling back to ${rocm_dir}/lib/llvm/bin/amdclang++"
+  hip_compiler=${rocm_dir}/lib/llvm/bin/amdclang++
 
   if ! command -v ${hip_compiler} 2>&1 >/dev/null ; then
     echo "[WARN] ${hip_compiler} does not exist. Please be advised."

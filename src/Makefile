@@ -14,7 +14,7 @@ DEBUG ?= 0
 NCCL_HOME ?= ""
 CUSTOM_RCCL_LIB ?= ""
 
-HIPCC ?= $(ROCM_PATH)/bin/amdclang++
+HIPCC ?= $(ROCM_PATH)/lib/llvm/bin/amdclang++
 HIPCONFIG = $(ROCM_PATH)/bin/hipconfig
 HIPIFY_PL_EXE=$(ROCM_PATH)/bin/hipify-perl
 HIPIFY_PL_FLAGS = -quiet-warnings

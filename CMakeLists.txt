@@ -115,6 +115,7 @@ if(ROCM_PATH)
   list(PREPEND CMAKE_PREFIX_PATH  # Add ROCM_PATH to CMake search paths (for finding HIP / HSA
               ${ROCM_PATH}
               ${ROCM_PATH}/hip
+              ${ROCM_PATH}/lib/llvm
               ${ROCM_PATH}/llvm)
 endif()
 
